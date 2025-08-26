@@ -8,25 +8,28 @@ import { fileURLToPath } from "url";
 
 // Routes import
 import reservationRoutes from "./routes/reservationRoutes.js";
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // MongoDB connect
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected"))
-  .catch(err => console.error(err));
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch(err => console.error("❌ MongoDB Error:", err));
 
 // Middlewares
 app.use(express.json());
 
+// Debug middleware (for checking requests)
 app.use((req, res, next) => {
-  console.log("Incoming Request:", req.method, req.url);
+  console.log("👉 Incoming Request:", req.method, req.url);
   console.log("Headers:", req.headers);
   console.log("Body:", req.body);
   next();
 });
+
 // API routes
-app.use("/api/v1/reservation", reservationRoutes);  // <-- yeh connect karo
+app.use("/api/v1/reservation", reservationRoutes);
 
 // ===== Serve React frontend =====
 const __filename = fileURLToPath(import.meta.url);
@@ -34,8 +37,9 @@ const __dirname = path.dirname(__filename);
 
 app.use(express.static(path.join(__dirname, "build")));
 
-app.get("/*", (req, res) => {
+// ✅ Fixed fallback route (no more error)
+app.get(/(.*)/, (req, res) => {
   res.sendFile(path.join(__dirname, "build", "index.html"));
 });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
